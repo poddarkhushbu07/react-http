@@ -1,7 +1,7 @@
-import axios, {AxiosRequestConfig} from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { timer } from 'rxjs';
 import * as React from 'react';
-import { URL } from './server.constants'
+import { URL } from './server.constants';
 import Cookie from 'universal-cookie';
 
 export const cookies = new Cookie();
@@ -21,25 +21,46 @@ class HttpService {
         this.unAuthorizedError = false;
     }
 
-    apiCall = (url: string, request: any, extraHeaders: { [key: string]: string } | null) => {
+    get(endPoint: string,
+        params?: object,
+        contentType?: string,
+        backendUrl?: string,
+        extraHeaders?: object,
+        responseType: HttpResponseTypes = HttpResponseTypes.json,
+        withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
             let count = 0;
 
             let headers: { [key: string]: string } | null = {
                 Authorization: `Bearer ${this.getAccessToken()}`,
             };
-            if (!extraHeaders || !extraHeaders['Content-Type']) {
 
-                headers['Content-type'] = 'application/json';
+            if (contentType) {
+                headers['Content-Type'] = contentType;
+            } else {
+                headers['Content-Type'] = 'application/json';
             }
+            let config: AxiosRequestConfig = {};
+            config.headers = {...headers, ...extraHeaders};
+            if (params) {
+                config.params = params;
+            }
+            config.data = {};
+            if (backendUrl) {
+                config.baseURL = backendUrl;
+            }
+            if (responseType) {
+                config.responseType = responseType;
+            }
+            if (withCredentials) {
+                config.withCredentials = withCredentials;
+            }
+
+
             const takeCallback = () => {
-                http.post(url, request, {
-                    headers: { ...headers, ...extraHeaders },
-                }).then((response) => {
+                http.get(endPoint, config).then((response) => {
                     resolve(response);
                 }).catch((httpError) => {
-                    console.log('service');
-                    console.log(httpError);
                     count++;
                     this.handleError(httpError).then((handleError) => {
                         if (handleError === 'unAuthorizedError') {
@@ -68,8 +89,8 @@ class HttpService {
             };
             takeCallback();
         });
+    }
 
-    };
 
     handleError(error: any | any): Promise<string> {
         return new Promise<any>((resolve: any, reject: any) => {
@@ -85,10 +106,10 @@ class HttpService {
                             this.unAuthorizedError = false;
                             resolve('success');
                         }).catch(tokenError => {
-                            this.removeUsersDetailsAndRedirect();
-                            this.unAuthorizedError = false;
-                            reject('error');
-                        });
+                        this.removeUsersDetailsAndRedirect();
+                        this.unAuthorizedError = false;
+                        reject('error');
+                    });
                 }
             } else {
                 reject('error');
@@ -109,7 +130,7 @@ class HttpService {
             }
             const takeCallback = () => {
                 http.get(url, {
-                    headers: { ...headers, ...extraHeaders, ...(request ? { params: request } : {}) }
+                    headers: {...headers, ...extraHeaders, ...(request ? {params: request} : {})}
                 }).then((response) => {
                     resolve(response);
                 }).catch((httpError) => {
@@ -147,9 +168,9 @@ class HttpService {
     };
 
     storeAccessTokenResponse = (access_token: string, expires_in: string, refresh_token: string) => {
-        cookies.set('access-token', access_token, { path: '/' });
-        cookies.set('expires_in', expires_in, { path: '/' });
-        cookies.set('refresh_token', refresh_token, { path: '/' });
+        cookies.set('access-token', access_token, {path: '/'});
+        cookies.set('expires_in', expires_in, {path: '/'});
+        cookies.set('refresh_token', refresh_token, {path: '/'});
 
     };
 
@@ -197,15 +218,15 @@ class HttpService {
         };
         /* object.grant_type = 'refresh_token';
          object.refresh_token = cookies.get('refresh_token');*/
-        return this.apiCall(
+        return this.get(
             '/oauth/token',
             this.formatData(request), {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: 'Basic cmVzdDpyZXN0',
-            domain: 'HP',
-            app: 'artms',
-            language: 'en'
-        }
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Authorization: 'Basic cmVzdDpyZXN0',
+                domain: 'HP',
+                app: 'artms',
+                language: 'en'
+            }
         );
     }
 
@@ -222,7 +243,8 @@ class HttpService {
         }
         return returnData;
     }
-    fileUploadProgress: any
+
+    fileUploadProgress: any;
 
     multipart(
         endPoint: string,
@@ -231,46 +253,46 @@ class HttpService {
         backendUrl?: string,
         responseType: HttpResponseTypes = HttpResponseTypes.blob,
         authKey: string = 'Authorization',
-        uploadProgressEvent =  (progressEvent: any)  => {
-            var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            console.log(percentCompleted)
+        uploadProgressEvent = (progressEvent: any) => {
+            var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(percentCompleted);
         }
     ): Promise<any> {
         return new Promise((resolve, reject) => {
             let count = 0;
             const takeCallback = (): void => {
 
-                this.multipartApiCall(endPoint, formData, methodType, backendUrl,uploadProgressEvent , responseType, authKey)
+                this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey)
                     .then((result: any) => {
                         resolve(result);
-                    }).catch((httpError) =>{
-                        console.log('service');
-                        console.log(httpError);
-                        count++;
-                        this.handleError(httpError).then((handleError) => {
-                            if (handleError === 'unAuthorizedError') {
-                                this.checkToken().then(() => {
-                                    if (count >= 3) {
-                                        reject(httpError);
-                                    } else {
-                                        takeCallback();
-                                    }
-                                }).catch((error: any) => {
-                                    reject(httpError);
-                                });
-                            } else if (handleError === 'success') {
+                    }).catch((httpError) => {
+                    console.log('service');
+                    console.log(httpError);
+                    count++;
+                    this.handleError(httpError).then((handleError) => {
+                        if (handleError === 'unAuthorizedError') {
+                            this.checkToken().then(() => {
                                 if (count >= 3) {
                                     reject(httpError);
                                 } else {
                                     takeCallback();
                                 }
-                            } else if (handleError === 'error') {
+                            }).catch((error: any) => {
                                 reject(httpError);
+                            });
+                        } else if (handleError === 'success') {
+                            if (count >= 3) {
+                                reject(httpError);
+                            } else {
+                                takeCallback();
                             }
-                        }).catch((error: any) => {
-                            reject(error);
-                        });
+                        } else if (handleError === 'error') {
+                            reject(httpError);
+                        }
+                    }).catch((error: any) => {
+                        reject(error);
                     });
+                });
 
 
             };
@@ -279,27 +301,28 @@ class HttpService {
         });
 
     }
+
     multipartApiCall = (endPoint: string,
-        formData: FormData,
-        methodType: HttpMethodTypes = HttpMethodTypes.GET,
-        backendUrl?: string,
-        uploadProgressEvent?: (progressEvent: any) => void,
-        responseType: HttpResponseTypes = HttpResponseTypes.blob,
-        authKey: string = 'Authorization') => {
+                        formData: FormData,
+                        methodType: HttpMethodTypes = HttpMethodTypes.GET,
+                        backendUrl?: string,
+                        uploadProgressEvent?: (progressEvent: any) => void,
+                        responseType: HttpResponseTypes = HttpResponseTypes.blob,
+                        authKey: string = 'Authorization') => {
         return new Promise((resolve2: any, reject2: any): any => {
             let headers: { [key: string]: string } | null = {
                 Authorization: `Bearer ${this.getAccessToken()}`,
             };
             let config: AxiosRequestConfig<any> = {
                 onUploadProgress: uploadProgressEvent,
-            }
+            };
 
 
             axios.post(URL + endPoint, formData, {...config, ...{headers: headers}})
                 .then(res => resolve2(res))
-                .catch(err => reject2(err))
-        });  
-    }         
+                .catch(err => reject2(err));
+        });
+    };
 }
 
 
@@ -323,8 +346,13 @@ export enum HttpMethodTypes {
 export enum HttpResponseTypes {
     'blob' = 'blob',
     'json' = 'json',
-    'arraybuffer' = 'arraybuffer'
+    'arraybuffer' = 'arraybuffer',
+    'document' = 'document',
+    'text' = 'text',
+    'stream' = 'stream'
 }
+
+
 const httpService = new HttpService();
 export default httpService;
 
