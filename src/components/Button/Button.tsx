@@ -24,6 +24,8 @@ export interface ButtonProps  {
   onClick?: (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
+
+  className? : string[] | string;
 };
 
 /**
@@ -35,6 +37,7 @@ const Button = ({
   size = "medium",
   onClick,
   label,
+    className
 }: ButtonProps) => {
   const mode = primary
     ? "storybook-button--primary"
@@ -42,7 +45,7 @@ const Button = ({
   return (
     <button
       type="button"
-      className={["storybook-button", `storybook-button--${size}`, mode].join(
+      className={["storybook-button", `storybook-button--${size}`, mode, className].join(
         " "
       )}
       style={backgroundColor ? { backgroundColor }: {}}

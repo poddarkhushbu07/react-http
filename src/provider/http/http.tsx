@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import { timer } from 'rxjs';
 import * as React from 'react';
-import { HttpConstants } from './server.constants';
+import { HttpConstants, HttpMethodTypes, HttpResponseTypes } from './server.constants';
 import Cookie from 'universal-cookie';
 
 export const cookies = new Cookie();
@@ -21,6 +21,16 @@ class HttpService {
         this.unAuthorizedError = false;
     }
 
+    /**
+     * HTTP GET API USING AXIOS
+     * @param {string} endPoint
+     * @param {object | string} [params]
+     * @param {string} [contentType]
+     * @param {string} [backendUrl]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
     get(endPoint: string,
         params?: object | string,
         contentType?: string,
@@ -45,7 +55,16 @@ class HttpService {
         });
     }
 
-    getFromUrl(endPoint: string,
+    /**
+     * HTTP GET API USING AXIOS - BY PASSING FULL URL
+     * @param {string} url
+     * @param {object | string} [params]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    getFromUrl(url: string,
                params?: object | string,
                contentType?: string,
                extraHeaders?: { [key: string]: string },
@@ -54,6 +73,38 @@ class HttpService {
         return new Promise<any>((resolve, reject) => {
             let count = 0;
             let config = this.getRequestOptions(params, null, '/', contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.get(url, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then(r => {
+                    });
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP GET API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
+     * @param {string} url
+     * @param {object | string} [params]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    getFromUrlWithoutHeader(endPoint: string,
+                            params?: object | string,
+                            contentType?: string,
+                            extraHeaders?: { [key: string]: string },
+                            responseType: HttpResponseTypes = HttpResponseTypes.json,
+                            withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptionsForWithoutHeader(params, null, contentType, extraHeaders, responseType, withCredentials);
             const takeCallback = async () => {
                 try {
                     const response = await http.get(endPoint, config);
@@ -68,6 +119,18 @@ class HttpService {
         });
     }
 
+    /**
+     * HTTP POST API USING AXIOS
+     * @param {string} endPoint
+     * @param {object} [requestBody]
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {string} [backendUrl]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
     post(endPoint: string,
          requestBody: object,
          params?: object | string,
@@ -82,7 +145,285 @@ class HttpService {
             let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
             const takeCallback = async () => {
                 try {
-                    const response = await http.get(endPoint, config);
+                    const response = await http.post(endPoint, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP POST API USING AXIOS - BY PASSING FULL URL
+     * @param {string} url
+     * @param {object} [requestBody]
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    postFromUrl(url: string,
+                requestBody: object,
+                params?: object | string,
+                body?: object,
+                contentType?: string,
+                extraHeaders?: { [key: string]: string },
+                responseType: HttpResponseTypes = HttpResponseTypes.json,
+                withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, body, '/', contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.post(url, requestBody, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP POST API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
+     * @param {string} url
+     * @param {object} [requestBody]
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    postFromUrlWithoutHeader(url: string,
+                             requestBody: object,
+                             params?: object | string,
+                             body?: object,
+                             contentType?: string,
+                             extraHeaders?: { [key: string]: string },
+                             responseType: HttpResponseTypes = HttpResponseTypes.json,
+                             withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptionsForWithoutHeader(params, null, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.post(url, requestBody, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP PUT API USING AXIOS
+     * @param {string} endPoint
+     * @param {object} [requestBody]
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    put(endPoint: string,
+        requestBody: object,
+        params?: object | string,
+        body?: object,
+        contentType?: string,
+        backendUrl?: string,
+        extraHeaders?: { [key: string]: string },
+        responseType: HttpResponseTypes = HttpResponseTypes.json,
+        withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.put(endPoint, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP PUT API USING AXIOS - BY PASSING FULL URL
+     * @param {string} url
+     * @param {object} [requestBody]
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    putFromUrl(url: string,
+               requestBody: object,
+               params?: object | string,
+               body?: object,
+               contentType?: string,
+               extraHeaders?: { [key: string]: string },
+               responseType: HttpResponseTypes = HttpResponseTypes.json,
+               withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, body, '/', contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.put(url, requestBody, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP PUT API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
+     * @param {string} url
+     * @param {object} [requestBody]
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    putFromUrlWithoutHeader(url: string,
+                            requestBody: object,
+                            params?: object | string,
+                            body?: object,
+                            contentType?: string,
+                            extraHeaders?: { [key: string]: string },
+                            responseType: HttpResponseTypes = HttpResponseTypes.json,
+                            withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptionsForWithoutHeader(params, null, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.put(url, requestBody, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+
+    /**
+     * HTTP DELETE API USING AXIOS
+     * @param {string} endPoint
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {string} [backendUrl]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    delete(endPoint: string,
+           params?: object | string,
+           body?: object,
+           contentType?: string,
+           backendUrl?: string,
+           extraHeaders?: { [key: string]: string },
+           responseType: HttpResponseTypes = HttpResponseTypes.json,
+           withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.delete(endPoint, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP DELETE API USING AXIOS - BY PASSING FULL URL
+     * @param {string} url
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    deleteFromUrl(url: string,
+                  params?: object | string,
+                  body?: object,
+                  contentType?: string,
+                  extraHeaders?: { [key: string]: string },
+                  responseType: HttpResponseTypes = HttpResponseTypes.json,
+                  withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, body, '/', contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.delete(url, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    /**
+     * HTTP DELETE API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
+     * @param {string} url
+     * @param {object | string} [params]
+     * @param {object} [body]
+     * @param {string} [contentType]
+     * @param {{ [key: string]: string }} [extraHeaders]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.json]
+     * @param {boolean} [withCredentials]
+     */
+    deleteFromUrlWithoutHeader(url: string,
+                               params?: object | string,
+                               body?: object,
+                               contentType?: string,
+                               extraHeaders?: { [key: string]: string },
+                               responseType: HttpResponseTypes = HttpResponseTypes.json,
+                               withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptionsForWithoutHeader(params, null, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.delete(url, config);
                     resolve(response);
                 } catch (httpError: any) {
                     count++;
@@ -274,11 +615,66 @@ class HttpService {
 
     fileUploadProgress: any;
 
+    /**
+     * MULTIPART REQUEST USING AXIOS
+     * @param {string} endPoint
+     * @param {FormData} formData
+     * @param {HttpMethodTypes} [methodType = HttpMethodTypes.GET]
+     * @param {string} [backendUrl]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.blob]
+     * @param {string} [authKey = 'Authorization']
+     * @param {object | string} [params]
+     * @param {*} [uploadProgressEvent] - Function to get file upload progress event
+     * Sample:
+     * (progressEvent: any) => {
+            var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(percentCompleted);
+        }
+     */
     multipart(
         endPoint: string,
         formData: FormData,
         methodType: HttpMethodTypes = HttpMethodTypes.GET,
         backendUrl?: string,
+        responseType: HttpResponseTypes = HttpResponseTypes.blob,
+        authKey: string = 'Authorization',
+        uploadProgressEvent?: any
+    ): Promise<AxiosResponse<any>> {
+        return new Promise((resolve, reject) => {
+            let count = 0;
+            const takeCallback = async () => {
+                try {
+                    const response: AxiosResponse<any> = await this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
+            };
+            takeCallback();
+        });
+
+    }
+
+    /**
+     * MULTIPART REQUEST USING AXIOS - BY PASSING FULL URL
+     * @param {string} url
+     * @param {FormData} formData
+     * @param {HttpMethodTypes} [methodType = HttpMethodTypes.GET]
+     * @param {HttpResponseTypes} [responseType = HttpResponseTypes.blob]
+     * @param {string} [authKey = 'Authorization']
+     * @param {object | string} [params]
+     * @param {*} [uploadProgressEvent] - Function to get file upload progress event
+     * Sample:
+     * (progressEvent: any) => {
+            var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(percentCompleted);
+        }
+     */
+    multipartFromUrl(
+        url: string,
+        formData: FormData,
+        methodType: HttpMethodTypes = HttpMethodTypes.GET,
         responseType: HttpResponseTypes = HttpResponseTypes.blob,
         authKey: string = 'Authorization',
         uploadProgressEvent = (progressEvent: any) => {
@@ -290,7 +686,7 @@ class HttpService {
             let count = 0;
             const takeCallback = async () => {
                 try {
-                    const response: AxiosResponse<any> = await this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey);
+                    const response: AxiosResponse<any> = await this.multipartApiCall(url, formData, methodType, '/', uploadProgressEvent, responseType, authKey);
                     resolve(response);
                 } catch (httpError: any) {
                     count++;
@@ -339,8 +735,6 @@ class HttpService {
 
         if (contentType) {
             headers['Content-Type'] = contentType;
-        } else {
-            headers['Content-Type'] = 'application/json';
         }
 
         /*Set Extra Headers from HttpServiceConstants*/
@@ -384,33 +778,49 @@ class HttpService {
 
         return config;
     }
-}
+
+    private getRequestOptionsForWithoutHeader(
+        params?: any,
+        body?: any,
+        contentType?: string,
+        extraHeaders?: any,
+        responseType?: HttpResponseTypes,
+        withCredentials?: boolean): AxiosRequestConfig {
+
+        let headers: { [key: string]: string } = {};
+
+        if (contentType) {
+            headers['Content-Type'] = contentType;
+        }
 
 
-export class OAuthRequestProto {
-    username: string | undefined;
-    password: string | undefined;
-    scope: string = 'write';
-    grant_type: string = 'password';
-    realm: string | undefined;
-    authType: string | undefined;
-    refresh_token: string | undefined;
-}
+        if (extraHeaders && Object.keys(extraHeaders).length > 0) {
+            for (const headerDataKey in extraHeaders) {
+                if (extraHeaders[headerDataKey]) {
+                    headers[headerDataKey] = extraHeaders[headerDataKey];
+                }
+            }
+        }
+        let config: AxiosRequestConfig = {};
+        config.headers = {...headers};
+        if (params) {
+            config.params = params;
+        }
+        /*Set body section*/
+        config.data = {};
+        if (body) {
+            config.data = body;
+        }
+        if (responseType) {
+            config.responseType = responseType;
+        }
+        if (withCredentials) {
+            config.withCredentials = withCredentials;
+        }
 
-export enum HttpMethodTypes {
-    'GET' = 'GET',
-    'POST' = 'POST',
-    'PUT' = 'PUT'
-}
 
-
-export enum HttpResponseTypes {
-    'blob' = 'blob',
-    'json' = 'json',
-    'arraybuffer' = 'arraybuffer',
-    'document' = 'document',
-    'text' = 'text',
-    'stream' = 'stream'
+        return config;
+    }
 }
 
 
