@@ -1,7 +1,7 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import { timer } from 'rxjs';
 import * as React from 'react';
-import { URL } from './server.constants';
+import { HttpConstants } from './server.constants';
 import Cookie from 'universal-cookie';
 
 export const cookies = new Cookie();
@@ -22,80 +22,109 @@ class HttpService {
     }
 
     get(endPoint: string,
-        params?: object,
+        params?: object | string,
         contentType?: string,
         backendUrl?: string,
-        extraHeaders?: object,
+        extraHeaders?: { [key: string]: string },
         responseType: HttpResponseTypes = HttpResponseTypes.json,
         withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
             let count = 0;
-
-            let headers: { [key: string]: string } | null = {
-                Authorization: `Bearer ${this.getAccessToken()}`,
-            };
-
-            if (contentType) {
-                headers['Content-Type'] = contentType;
-            } else {
-                headers['Content-Type'] = 'application/json';
-            }
-            let config: AxiosRequestConfig = {};
-            config.headers = {...headers, ...extraHeaders};
-            if (params) {
-                config.params = params;
-            }
-            config.data = {};
-            if (backendUrl) {
-                config.baseURL = backendUrl;
-            }
-            if (responseType) {
-                config.responseType = responseType;
-            }
-            if (withCredentials) {
-                config.withCredentials = withCredentials;
-            }
-
-
-            const takeCallback = () => {
-                http.get(endPoint, config).then((response) => {
+            let config = this.getRequestOptions(params, null, backendUrl, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.get(endPoint, config);
                     resolve(response);
-                }).catch((httpError) => {
+                } catch (httpError: any) {
                     count++;
-                    this.handleError(httpError).then((handleError) => {
-                        if (handleError === 'unAuthorizedError') {
-                            this.checkToken().then(() => {
-                                if (count >= 3) {
-                                    reject(httpError);
-                                } else {
-                                    takeCallback();
-                                }
-                            }).catch((error: any) => {
-                                reject(httpError);
-                            });
-                        } else if (handleError === 'success') {
-                            if (count >= 3) {
-                                reject(httpError);
-                            } else {
-                                takeCallback();
-                            }
-                        } else if (handleError === 'error') {
-                            reject(httpError);
-                        }
-                    }).catch((error: any) => {
-                        reject(error);
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then(r => {
                     });
-                });
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    getFromUrl(endPoint: string,
+               params?: object | string,
+               contentType?: string,
+               extraHeaders?: { [key: string]: string },
+               responseType: HttpResponseTypes = HttpResponseTypes.json,
+               withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, null, '/', contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.get(endPoint, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then(r => {
+                    });
+                }
+            };
+            takeCallback();
+        });
+    }
+
+    post(endPoint: string,
+         requestBody: object,
+         params?: object | string,
+         body?: object,
+         contentType?: string,
+         backendUrl?: string,
+         extraHeaders?: { [key: string]: string },
+         responseType: HttpResponseTypes = HttpResponseTypes.json,
+         withCredentials?: boolean) {
+        return new Promise<any>((resolve, reject) => {
+            let count = 0;
+            let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
+            const takeCallback = async () => {
+                try {
+                    const response = await http.get(endPoint, config);
+                    resolve(response);
+                } catch (httpError: any) {
+                    count++;
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
             };
             takeCallback();
         });
     }
 
 
-    handleError(error: any | any): Promise<string> {
+    handleCatchBlock = async (httpError: AxiosError, count: number, resolve: any, reject: any, takeCallback: () => {}) => {
+        try {
+            const handleError = await this.processError(httpError.response);
+            if (handleError === 'unAuthorizedError') {
+                this.checkToken().then(() => {
+                    if (count >= 3) {
+                        reject(httpError.response);
+                    } else {
+                        takeCallback();
+                    }
+                }).catch((error: any) => {
+                    reject(httpError.response);
+                });
+            } else if (handleError === 'success') {
+                if (count >= 3) {
+                    reject(httpError.response);
+                } else {
+                    takeCallback();
+                }
+            } else if (handleError === 'error') {
+                reject(httpError.response);
+            }
+        } catch (error: any) {
+            reject(error);
+        }
+    };
+
+
+    processError(error: any | any): Promise<string> {
         return new Promise<any>((resolve: any, reject: any) => {
-            console.log(error.response);
-            if (error.response.status === 401) {
+            if (error.status === 401) {
                 if (this.unAuthorizedError) {
                     resolve('unAuthorizedError');
                 } else {
@@ -108,11 +137,11 @@ class HttpService {
                         }).catch(tokenError => {
                         this.removeUsersDetailsAndRedirect();
                         this.unAuthorizedError = false;
-                        reject('error');
+                        resolve('error');
                     });
                 }
             } else {
-                reject('error');
+                resolve('error');
             }
         });
     }
@@ -138,7 +167,7 @@ class HttpService {
                     console.log(httpError);
                     count++;
                     reject(httpError);
-                    this.handleError(httpError).then((handleError) => {
+                    this.processError(httpError).then((handleError) => {
                         if (handleError === 'unAuthorizedError') {
                             this.checkToken().then(() => {
                                 if (count >= 3) {
@@ -220,8 +249,7 @@ class HttpService {
          object.refresh_token = cookies.get('refresh_token');*/
         return this.get(
             '/oauth/token',
-            this.formatData(request), {
-                'Content-Type': 'application/x-www-form-urlencoded',
+            this.formatData(request), 'application/x-www-form-urlencoded', undefined, {
                 Authorization: 'Basic cmVzdDpyZXN0',
                 domain: 'HP',
                 app: 'artms',
@@ -257,47 +285,19 @@ class HttpService {
             var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(percentCompleted);
         }
-    ): Promise<any> {
+    ): Promise<AxiosResponse<any>> {
         return new Promise((resolve, reject) => {
             let count = 0;
-            const takeCallback = (): void => {
-
-                this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey)
-                    .then((result: any) => {
-                        resolve(result);
-                    }).catch((httpError) => {
-                    console.log('service');
-                    console.log(httpError);
+            const takeCallback = async () => {
+                try {
+                    const response: AxiosResponse<any> = await this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey);
+                    resolve(response);
+                } catch (httpError: any) {
                     count++;
-                    this.handleError(httpError).then((handleError) => {
-                        if (handleError === 'unAuthorizedError') {
-                            this.checkToken().then(() => {
-                                if (count >= 3) {
-                                    reject(httpError);
-                                } else {
-                                    takeCallback();
-                                }
-                            }).catch((error: any) => {
-                                reject(httpError);
-                            });
-                        } else if (handleError === 'success') {
-                            if (count >= 3) {
-                                reject(httpError);
-                            } else {
-                                takeCallback();
-                            }
-                        } else if (handleError === 'error') {
-                            reject(httpError);
-                        }
-                    }).catch((error: any) => {
-                        reject(error);
-                    });
-                });
-
-
+                    this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
+                }
             };
             takeCallback();
-
         });
 
     }
@@ -308,21 +308,82 @@ class HttpService {
                         backendUrl?: string,
                         uploadProgressEvent?: (progressEvent: any) => void,
                         responseType: HttpResponseTypes = HttpResponseTypes.blob,
-                        authKey: string = 'Authorization') => {
+                        authKey: string = 'Authorization'): Promise<AxiosResponse<any>> => {
         return new Promise((resolve2: any, reject2: any): any => {
             let headers: { [key: string]: string } | null = {
                 Authorization: `Bearer ${this.getAccessToken()}`,
             };
-            let config: AxiosRequestConfig<any> = {
-                onUploadProgress: uploadProgressEvent,
-            };
+
+            let config: AxiosRequestConfig = this.getRequestOptions(null, null, backendUrl, undefined, undefined, responseType, false, methodType);
+
+            config.onUploadProgress = uploadProgressEvent;
 
 
-            axios.post(URL + endPoint, formData, {...config, ...{headers: headers}})
+            http.post(endPoint, formData, config)
                 .then(res => resolve2(res))
                 .catch(err => reject2(err));
         });
     };
+
+    private getRequestOptions(params?: any,
+                              body?: any,
+                              backendUrl?: string,
+                              contentType?: string,
+                              extraHeaders?: { [key: string]: string },
+                              responseType?: HttpResponseTypes, withCredentials?: boolean, methodType?: Method): AxiosRequestConfig {
+
+
+        let headers: { [key: string]: string } = {
+            [HttpConstants.authorizationKey]: `${HttpConstants.securityToken} ${this.getAccessToken()}`,
+        };
+
+        if (contentType) {
+            headers['Content-Type'] = contentType;
+        } else {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        /*Set Extra Headers from HttpServiceConstants*/
+        if (Object.keys(HttpConstants.headers).length > 0) {
+            // tslint:disable-next-line:forin
+            for (const headerDataKey in HttpConstants.headers) {
+                headers[headerDataKey] = HttpConstants.headers[headerDataKey];
+            }
+        }
+
+        if (extraHeaders && Object.keys(extraHeaders).length > 0) {
+            for (const headerDataKey in extraHeaders) {
+                if (extraHeaders[headerDataKey]) {
+                    headers[headerDataKey] = extraHeaders[headerDataKey];
+                }
+            }
+        }
+        let config: AxiosRequestConfig = {};
+        config.headers = {...headers};
+        if (params) {
+            config.params = params;
+        }
+        /*Set body section*/
+        config.data = {};
+        if (body) {
+            config.data = body;
+        }
+        if (backendUrl) {
+            config.baseURL = backendUrl;
+        }
+        if (responseType) {
+            config.responseType = responseType;
+        }
+        if (withCredentials) {
+            config.withCredentials = withCredentials;
+        }
+        if (methodType) {
+            config.method = methodType;
+        }
+
+
+        return config;
+    }
 }
 
 
