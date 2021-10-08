@@ -22,6 +22,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP GET API USING AXIOS
      * @param {string} endPoint
      * @param {object | string} [params]
@@ -56,6 +57,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP GET API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object | string} [params]
@@ -88,6 +90,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP GET API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object | string} [params]
@@ -120,6 +123,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP POST API USING AXIOS
      * @param {string} endPoint
      * @param {object} [requestBody]
@@ -157,6 +161,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP POST API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object} [requestBody]
@@ -192,6 +197,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP POST API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object} [requestBody]
@@ -227,6 +233,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP PUT API USING AXIOS
      * @param {string} endPoint
      * @param {object} [requestBody]
@@ -263,6 +270,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP PUT API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object} [requestBody]
@@ -298,6 +306,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP PUT API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object} [requestBody]
@@ -334,6 +343,7 @@ class HttpService {
 
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP DELETE API USING AXIOS
      * @param {string} endPoint
      * @param {object | string} [params]
@@ -369,6 +379,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP DELETE API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object | string} [params]
@@ -402,6 +413,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP DELETE API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object | string} [params]
@@ -435,7 +447,7 @@ class HttpService {
     }
 
 
-    handleCatchBlock = async (httpError: AxiosError, count: number, resolve: any, reject: any, takeCallback: () => {}) => {
+    private handleCatchBlock = async (httpError: AxiosError, count: number, resolve: any, reject: any, takeCallback: () => {}) => {
         try {
             const handleError = await this.processError(httpError.response);
             if (handleError === 'unAuthorizedError') {
@@ -463,7 +475,7 @@ class HttpService {
     };
 
 
-    processError(error: any | any): Promise<string> {
+    private processError(error: any | any): Promise<string> {
         return new Promise<any>((resolve: any, reject: any) => {
             if (error.status === 401) {
                 if (this.unAuthorizedError) {
@@ -487,56 +499,6 @@ class HttpService {
         });
     }
 
-    getApiCall = (url: string, request: any, extraHeaders: { [key: string]: string }) => {
-        return new Promise<any>((resolve, reject) => {
-            let count = 0;
-
-            let headers: { [key: string]: string } | null = {
-                Authorization: `Bearer ${this.getAccessToken()}`,
-            };
-            if (!extraHeaders || !extraHeaders['Content-Type']) {
-
-                headers['Content-type'] = 'application/json';
-            }
-            const takeCallback = () => {
-                http.get(url, {
-                    headers: {...headers, ...extraHeaders, ...(request ? {params: request} : {})}
-                }).then((response) => {
-                    resolve(response);
-                }).catch((httpError) => {
-                    console.log('service');
-                    console.log(httpError);
-                    count++;
-                    reject(httpError);
-                    this.processError(httpError).then((handleError) => {
-                        if (handleError === 'unAuthorizedError') {
-                            this.checkToken().then(() => {
-                                if (count >= 3) {
-                                    reject(httpError);
-                                } else {
-                                    takeCallback();
-                                }
-                            }).catch((error: any) => {
-                                reject(httpError);
-                            });
-                        } else if (handleError === 'success') {
-                            if (count >= 3) {
-                                reject(httpError);
-                            } else {
-                                takeCallback();
-                            }
-                        } else if (handleError === 'error') {
-                            reject(httpError);
-                        }
-                    }).catch((error: any) => {
-                        reject(error);
-                    });
-                });
-            };
-            takeCallback();
-        });
-    };
-
     storeAccessTokenResponse = (access_token: string, expires_in: string, refresh_token: string) => {
         cookies.set('access-token', access_token, {path: '/'});
         cookies.set('expires_in', expires_in, {path: '/'});
@@ -545,7 +507,7 @@ class HttpService {
     };
 
 
-    checkToken(): Promise<any> {
+    private checkToken(): Promise<any> {
         return new Promise((resolve) => {
             let count = 0;
             const timerSub = timer(1000, 1000);
@@ -599,7 +561,7 @@ class HttpService {
         );
     }
 
-    formatData(data: any): string {
+    private formatData(data: any): string {
         let returnData = '';
         let count = 0;
         for (const i in data) {
@@ -613,9 +575,9 @@ class HttpService {
         return returnData;
     }
 
-    fileUploadProgress: any;
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * MULTIPART REQUEST USING AXIOS
      * @param {string} endPoint
      * @param {FormData} formData
@@ -657,6 +619,7 @@ class HttpService {
     }
 
     /**
+     * @author Khushbu Poddar (Oct'21)
      * MULTIPART REQUEST USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {FormData} formData
@@ -824,8 +787,15 @@ class HttpService {
 }
 
 
+/**
+ * HttpService Instance to call get, put, post, delete, multipart APIs
+ * Example:
+ *    httpService.get({...parameters})
+ *       .then(res => console.log(res));
+ *       .catch(error => console.log(error))
+ */
 const httpService = new HttpService();
 export default httpService;
 
-export const HttpContext = React.createContext(httpService);
+ const HttpContext = React.createContext(httpService);
 
