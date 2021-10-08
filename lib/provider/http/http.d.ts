@@ -1,4 +1,4 @@
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import * as React from 'react';
 import { HttpMethodTypes, HttpResponseTypes } from './server.constants';
 import Cookie from 'universal-cookie';
@@ -7,6 +7,7 @@ declare class HttpService {
     unAuthorizedError: boolean | undefined;
     constructor();
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP GET API USING AXIOS
      * @param {string} endPoint
      * @param {object | string} [params]
@@ -20,6 +21,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP GET API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object | string} [params]
@@ -32,6 +34,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP GET API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object | string} [params]
@@ -44,6 +47,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP POST API USING AXIOS
      * @param {string} endPoint
      * @param {object} [requestBody]
@@ -59,6 +63,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP POST API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object} [requestBody]
@@ -73,6 +78,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP POST API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object} [requestBody]
@@ -87,6 +93,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP PUT API USING AXIOS
      * @param {string} endPoint
      * @param {object} [requestBody]
@@ -101,6 +108,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP PUT API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object} [requestBody]
@@ -115,6 +123,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP PUT API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object} [requestBody]
@@ -129,6 +138,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP DELETE API USING AXIOS
      * @param {string} endPoint
      * @param {object | string} [params]
@@ -143,6 +153,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP DELETE API USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {object | string} [params]
@@ -156,6 +167,7 @@ declare class HttpService {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * HTTP DELETE API USING AXIOS - BY PASSING FULL URL & HttpConstants.headers will not be sent in request
      * @param {string} url
      * @param {object | string} [params]
@@ -168,19 +180,16 @@ declare class HttpService {
     deleteFromUrlWithoutHeader(url: string, params?: object | string, body?: object, contentType?: string, extraHeaders?: {
         [key: string]: string;
     }, responseType?: HttpResponseTypes, withCredentials?: boolean): Promise<any>;
-    handleCatchBlock: (httpError: AxiosError, count: number, resolve: any, reject: any, takeCallback: () => {}) => Promise<void>;
-    processError(error: any | any): Promise<string>;
-    getApiCall: (url: string, request: any, extraHeaders: {
-        [key: string]: string;
-    }) => Promise<any>;
+    private handleCatchBlock;
+    private processError;
     storeAccessTokenResponse: (access_token: string, expires_in: string, refresh_token: string) => void;
-    checkToken(): Promise<any>;
+    private checkToken;
     getAccessToken(): string;
     removeUsersDetailsAndRedirect(): void;
     refreshToken(): Promise<any>;
-    formatData(data: any): string;
-    fileUploadProgress: any;
+    private formatData;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * MULTIPART REQUEST USING AXIOS
      * @param {string} endPoint
      * @param {FormData} formData
@@ -198,6 +207,7 @@ declare class HttpService {
      */
     multipart(endPoint: string, formData: FormData, methodType?: HttpMethodTypes, backendUrl?: string, responseType?: HttpResponseTypes, authKey?: string, uploadProgressEvent?: any): Promise<AxiosResponse<any>>;
     /**
+     * @author Khushbu Poddar (Oct'21)
      * MULTIPART REQUEST USING AXIOS - BY PASSING FULL URL
      * @param {string} url
      * @param {FormData} formData
@@ -217,6 +227,13 @@ declare class HttpService {
     private getRequestOptions;
     private getRequestOptionsForWithoutHeader;
 }
+/**
+ * HttpService Instance to call get, put, post, delete, multipart APIs
+ * Example:
+ *    httpService.get({...parameters})
+ *       .then(res => console.log(res));
+ *       .catch(error => console.log(error))
+ */
 declare const httpService: HttpService;
 export default httpService;
 export declare const HttpContext: React.Context<HttpService>;

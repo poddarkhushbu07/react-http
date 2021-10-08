@@ -669,9 +669,6 @@ class HttpService {
                         responseType: HttpResponseTypes = HttpResponseTypes.blob,
                         authKey: string = 'Authorization'): Promise<AxiosResponse<any>> => {
         return new Promise((resolve2: any, reject2: any): any => {
-            let headers: { [key: string]: string } | null = {
-                Authorization: `Bearer ${this.getAccessToken()}`,
-            };
 
             let config: AxiosRequestConfig = this.getRequestOptions(null, null, backendUrl, undefined, undefined, responseType, false, methodType);
 
@@ -691,7 +688,8 @@ class HttpService {
                               extraHeaders?: { [key: string]: string },
                               responseType?: HttpResponseTypes, withCredentials?: boolean, methodType?: Method): AxiosRequestConfig {
 
-
+       console.log(this.getAccessToken())
+        console.log(cookies)
         let headers: { [key: string]: string } = {
             [HttpConstants.authorizationKey]: `${HttpConstants.securityToken} ${this.getAccessToken()}`,
         };
@@ -797,5 +795,5 @@ class HttpService {
 const httpService = new HttpService();
 export default httpService;
 
- const HttpContext = React.createContext(httpService);
+export  const HttpContext = React.createContext(httpService);
 

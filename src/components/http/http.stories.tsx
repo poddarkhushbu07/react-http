@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { Meta } from '@storybook/react/types-6-0';
 import { Story } from '@storybook/react';
-import httpService, { HttpContext } from '../../provider/http/http';
 import './button.css';
 import { AxiosResponse } from 'axios';
 import Button from '../Button/Button';
-import { HttpMethodTypes, HttpResponseTypes } from '../../provider/http/server.constants';
+import { HttpMethodTypes, HttpResponseTypes, httpService } from '../../../lib';
 
 export default {
     title: 'Http Provider',
     decorators: [
         (Story) => (
-            <HttpContext.Provider value={httpService}>
+           /* <HttpContext.Provider value={httpService}>*/
                 <Story/>
-            </HttpContext.Provider>
+           /* </HttpContext.Provider>*/
         ),
     ],
 } as Meta;
