@@ -149,8 +149,8 @@ class HttpService {
             let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
             const takeCallback = async () => {
                 try {
-                    const response = await http.post(endPoint, config);
-                    resolve(response);
+                    const response = await http.post(endPoint,requestBody, config);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -186,7 +186,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.post(url, requestBody, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -222,7 +222,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.post(url, requestBody, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -259,7 +259,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.put(endPoint, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -295,7 +295,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.put(url, requestBody, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -331,7 +331,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.put(url, requestBody, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -368,7 +368,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.delete(endPoint, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -402,7 +402,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.delete(url, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -436,7 +436,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.delete(url, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -607,7 +607,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response: AxiosResponse<any> = await this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
@@ -650,7 +650,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response: AxiosResponse<any> = await this.multipartApiCall(url, formData, methodType, '/', uploadProgressEvent, responseType, authKey);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then();
