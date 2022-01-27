@@ -1,9 +1,14 @@
-export const URL = 'https://api-dev.hivepro.in:10443/artms-dev-v2-1-api';
-export const HttpConstants: { authorizationKey: string, securityToken: string; headers: { [key: string]: string } } = {
-    authorizationKey: 'Authorization',
-    securityToken: 'Bearer',
-    headers: {}
-};
+export class HttpConstants {
+    static URL = 'https://api-dev.hivepro.in:10443/artms-dev-v2-1-api';
+    static authorizationKey: string = 'Authorization';
+    static securityToken: string = 'Bearer';
+    static headers: { [key: string]: string } = {};
+
+    static setURL(val: string) {
+        HttpConstants.URL = val;
+    }
+
+}
 
 export enum HttpMethodTypes {
     'GET' = 'GET',

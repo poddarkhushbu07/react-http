@@ -4,7 +4,8 @@ import { Story } from '@storybook/react';
 import './button.css';
 import { AxiosResponse } from 'axios';
 import Button from '../Button/Button';
-import { HttpMethodTypes, HttpResponseTypes, httpService } from '../../../lib';
+import { HttpMethodTypes, HttpResponseTypes } from '../../provider/http/server.constants';
+import httpService from '../../provider/http/http';
 
 export default {
     title: 'Http Provider',
@@ -34,7 +35,6 @@ const Template: Story<any> = (args, config) => {
                     withCredentials?: boolean
                 } = {...args} as const;
                 const response = await httpService.get(req.endPoint, req.params, req.contentType, req.backendUrl, req.extraHeaders, req.responseType, req.withCredentials);
-                console.log(response);
                 setResponse(response);
                 setError(null);
             } catch (e) {
@@ -97,7 +97,6 @@ const Template: Story<any> = (args, config) => {
                     withCredentials?: boolean
                 } = {...args} as const;
                 const response = await httpService.post(req.endPoint, req.requestBody, req.params, req.body, req.contentType, req.backendUrl, req.extraHeaders, req.responseType, req.withCredentials);
-                console.log(response);
                 setResponse(response);
                 setError(null);
             } catch (e) {
@@ -300,7 +299,7 @@ const Template: Story<any> = (args, config) => {
                     console.log(req.files);
                     formData.append('file', req.files[0]);
                 }
-                const response = await httpService.multipart(req.endPoint, formData, req.methodType, req.backendUrl, req.responseType, req.authKey, req.uploadProgressEvent);
+                const response = await httpService.multipart(req.endPoint, formData, req.methodType, req.backendUrl, req.extraHeaders, req.responseType, req.uploadProgressEvent);
                 console.log(response);
                 setResponse(response as any);
                 setError(null);
@@ -333,7 +332,7 @@ const Template: Story<any> = (args, config) => {
                         formData.append('file', file);
                     });
                 }
-                const response = await httpService.multipartFromUrl(req.endPoint, formData, req.methodType, req.responseType, req.authKey, req.uploadProgressEvent);
+                const response = await httpService.multipartFromUrl(req.endPoint, formData, req.methodType, req.extraHeaders, req.responseType, req.uploadProgressEvent);
                 console.log(response);
                 setResponse(response as any);
                 setError(null);

@@ -5,13 +5,10 @@ import { HttpConstants, HttpMethodTypes, HttpResponseTypes } from './server.cons
 import Cookie from 'universal-cookie';
 
 export const cookies = new Cookie();
+
 const http = axios.create({
-    baseURL: 'https://api-dev.hivepro.in:10443/artms-dev-v2-1-api',
-    headers: {
-        domain: 'HP',
-        app: 'artms',
-        language: 'en',
-    }
+    baseURL: HttpConstants.URL,
+    headers: HttpConstants.headers
 });
 
 class HttpService {
@@ -45,7 +42,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.get(endPoint, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then(r => {
@@ -78,7 +75,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.get(url, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then(r => {
@@ -111,7 +108,7 @@ class HttpService {
             const takeCallback = async () => {
                 try {
                     const response = await http.get(endPoint, config);
-                    resolve(response);
+                    resolve(response.data);
                 } catch (httpError: any) {
                     count++;
                     this.handleCatchBlock(httpError, count, resolve, reject, takeCallback).then(r => {
@@ -149,7 +146,7 @@ class HttpService {
             let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
             const takeCallback = async () => {
                 try {
-                    const response = await http.post(endPoint,requestBody, config);
+                    const response = await http.post(endPoint, requestBody, config);
                     resolve(response.data);
                 } catch (httpError: any) {
                     count++;
@@ -258,7 +255,7 @@ class HttpService {
             let config = this.getRequestOptions(params, body, backendUrl, contentType, extraHeaders, responseType, withCredentials);
             const takeCallback = async () => {
                 try {
-                    const response = await http.put(endPoint, config);
+                    const response = await http.put(endPoint, requestBody, config);
                     resolve(response.data);
                 } catch (httpError: any) {
                     count++;
@@ -548,11 +545,11 @@ class HttpService {
             grant_type: 'refresh_token',
             refresh_token: cookies.get('refresh_token')
         };
-        /* object.grant_type = 'refresh_token';
-         object.refresh_token = cookies.get('refresh_token');*/
-        return this.get(
-            '/oauth/token',
-            this.formatData(request), 'application/x-www-form-urlencoded', undefined, {
+        let requestString = new URLSearchParams(request);
+        return this.post(
+            HttpConstants.URL + '/oauth/token',
+            requestString, undefined,
+            undefined, 'application/x-www-form-urlencoded', undefined, {
                 Authorization: 'Basic cmVzdDpyZXN0',
                 domain: 'HP',
                 app: 'artms',
@@ -583,6 +580,7 @@ class HttpService {
      * @param {FormData} formData
      * @param {HttpMethodTypes} [methodType = HttpMethodTypes.GET]
      * @param {string} [backendUrl]
+     * @param {{ [key: string]: string }} [extraHeaders]
      * @param {HttpResponseTypes} [responseType = HttpResponseTypes.blob]
      * @param {string} [authKey = 'Authorization']
      * @param {object | string} [params]
@@ -598,15 +596,17 @@ class HttpService {
         formData: FormData,
         methodType: HttpMethodTypes = HttpMethodTypes.GET,
         backendUrl?: string,
+        extraHeaders?: { [key: string]: string },
         responseType: HttpResponseTypes = HttpResponseTypes.blob,
-        authKey: string = 'Authorization',
         uploadProgressEvent?: any
     ): Promise<AxiosResponse<any>> {
         return new Promise((resolve, reject) => {
             let count = 0;
             const takeCallback = async () => {
                 try {
-                    const response: AxiosResponse<any> = await this.multipartApiCall(endPoint, formData, methodType, backendUrl, uploadProgressEvent, responseType, authKey);
+                    const response: AxiosResponse<any> =
+                        await this.multipartApiCall(endPoint, formData, methodType, backendUrl, extraHeaders,
+                            uploadProgressEvent, responseType);
                     resolve(response.data);
                 } catch (httpError: any) {
                     count++;
@@ -625,7 +625,6 @@ class HttpService {
      * @param {FormData} formData
      * @param {HttpMethodTypes} [methodType = HttpMethodTypes.GET]
      * @param {HttpResponseTypes} [responseType = HttpResponseTypes.blob]
-     * @param {string} [authKey = 'Authorization']
      * @param {object | string} [params]
      * @param {*} [uploadProgressEvent] - Function to get file upload progress event
      * Sample:
@@ -638,18 +637,21 @@ class HttpService {
         url: string,
         formData: FormData,
         methodType: HttpMethodTypes = HttpMethodTypes.GET,
+        extraHeaders?: { [key: string]: string },
         responseType: HttpResponseTypes = HttpResponseTypes.blob,
-        authKey: string = 'Authorization',
         uploadProgressEvent = (progressEvent: any) => {
             var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(percentCompleted);
         }
     ): Promise<AxiosResponse<any>> {
+        console.log(methodType);
         return new Promise((resolve, reject) => {
             let count = 0;
             const takeCallback = async () => {
                 try {
-                    const response: AxiosResponse<any> = await this.multipartApiCall(url, formData, methodType, '/', uploadProgressEvent, responseType, authKey);
+                    const response: AxiosResponse<any> = await this.multipartApiCall(url,
+                        formData, methodType, '/', extraHeaders,
+                        uploadProgressEvent, responseType);
                     resolve(response.data);
                 } catch (httpError: any) {
                     count++;
@@ -665,17 +667,20 @@ class HttpService {
                         formData: FormData,
                         methodType: HttpMethodTypes = HttpMethodTypes.GET,
                         backendUrl?: string,
+                        extraHeaders?: { [key: string]: string },
                         uploadProgressEvent?: (progressEvent: any) => void,
-                        responseType: HttpResponseTypes = HttpResponseTypes.blob,
-                        authKey: string = 'Authorization'): Promise<AxiosResponse<any>> => {
+                        responseType: HttpResponseTypes = HttpResponseTypes.blob): Promise<AxiosResponse<any>> => {
         return new Promise((resolve2: any, reject2: any): any => {
 
-            let config: AxiosRequestConfig = this.getRequestOptions(null, null, backendUrl, undefined, undefined, responseType, false, methodType);
-
+            let config: AxiosRequestConfig =
+                this.getRequestOptions(null, null, backendUrl,
+                    'multipart/form-data', extraHeaders, responseType,
+                    false, methodType);
             config.onUploadProgress = uploadProgressEvent;
-
-
-            http.post(endPoint, formData, config)
+            config.method = methodType.toLowerCase() as Method;
+            config.url = endPoint;
+            config.data = formData;
+            http.request(config)
                 .then(res => resolve2(res))
                 .catch(err => reject2(err));
         });
@@ -688,8 +693,6 @@ class HttpService {
                               extraHeaders?: { [key: string]: string },
                               responseType?: HttpResponseTypes, withCredentials?: boolean, methodType?: Method): AxiosRequestConfig {
 
-       console.log(this.getAccessToken())
-        console.log(cookies)
         let headers: { [key: string]: string } = {
             [HttpConstants.authorizationKey]: `${HttpConstants.securityToken} ${this.getAccessToken()}`,
         };
@@ -725,6 +728,8 @@ class HttpService {
         }
         if (backendUrl) {
             config.baseURL = backendUrl;
+        } else {
+            config.baseURL = HttpConstants.URL;
         }
         if (responseType) {
             config.responseType = responseType;
@@ -735,7 +740,6 @@ class HttpService {
         if (methodType) {
             config.method = methodType;
         }
-
 
         return config;
     }
@@ -749,7 +753,6 @@ class HttpService {
         withCredentials?: boolean): AxiosRequestConfig {
 
         let headers: { [key: string]: string } = {};
-
         if (contentType) {
             headers['Content-Type'] = contentType;
         }
@@ -779,7 +782,6 @@ class HttpService {
             config.withCredentials = withCredentials;
         }
 
-
         return config;
     }
 }
@@ -795,5 +797,5 @@ class HttpService {
 const httpService = new HttpService();
 export default httpService;
 
-export  const HttpContext = React.createContext(httpService);
+export const HttpContext = React.createContext(httpService);
 
