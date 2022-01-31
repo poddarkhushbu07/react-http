@@ -30,10 +30,10 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     get(endPoint: string,
-        params?: object | string,
-        contentType?: string,
-        backendUrl?: string,
-        extraHeaders?: { [key: string]: string },
+        params?: object | string | null,
+        contentType?: string | null,
+        backendUrl?: string | null,
+        extraHeaders?: { [key: string]: string } | null,
         responseType: HttpResponseTypes = HttpResponseTypes.json,
         withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -64,9 +64,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     getFromUrl(url: string,
-               params?: object | string,
-               contentType?: string,
-               extraHeaders?: { [key: string]: string },
+               params?: object | string | null,
+               contentType?: string | null,
+               extraHeaders?: { [key: string]: string } | null,
                responseType: HttpResponseTypes = HttpResponseTypes.json,
                withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -97,9 +97,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     getFromUrlWithoutHeader(endPoint: string,
-                            params?: object | string,
-                            contentType?: string,
-                            extraHeaders?: { [key: string]: string },
+                            params?: object | string | null,
+                            contentType?: string | null,
+                            extraHeaders?: { [key: string]: string } | null,
                             responseType: HttpResponseTypes = HttpResponseTypes.json,
                             withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -133,12 +133,12 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     post(endPoint: string,
-         requestBody: object,
-         params?: object | string,
-         body?: object,
-         contentType?: string,
-         backendUrl?: string,
-         extraHeaders?: { [key: string]: string },
+         requestBody: object | null,
+         params?: object | string | null,
+         body?: object | null,
+         contentType?: string | null,
+         backendUrl?: string | null,
+         extraHeaders?: { [key: string]: string } | null,
          responseType: HttpResponseTypes = HttpResponseTypes.json,
          withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -170,11 +170,11 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     postFromUrl(url: string,
-                requestBody: object,
-                params?: object | string,
-                body?: object,
-                contentType?: string,
-                extraHeaders?: { [key: string]: string },
+                requestBody: object | null,
+                params?: object | string | null,
+                body?: object | null,
+                contentType?: string | null,
+                extraHeaders?: { [key: string]: string } | null,
                 responseType: HttpResponseTypes = HttpResponseTypes.json,
                 withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -206,11 +206,11 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     postFromUrlWithoutHeader(url: string,
-                             requestBody: object,
-                             params?: object | string,
-                             body?: object,
-                             contentType?: string,
-                             extraHeaders?: { [key: string]: string },
+                             requestBody: object | null,
+                             params?: object | string | null,
+                             body?: object | null,
+                             contentType?: string | null,
+                             extraHeaders?: { [key: string]: string } | null,
                              responseType: HttpResponseTypes = HttpResponseTypes.json,
                              withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -242,12 +242,12 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     put(endPoint: string,
-        requestBody: object,
-        params?: object | string,
-        body?: object,
-        contentType?: string,
-        backendUrl?: string,
-        extraHeaders?: { [key: string]: string },
+        requestBody: object | null,
+        params?: object | string | null,
+        body?: object | null,
+        contentType?: string | null,
+        backendUrl?: string | null,
+        extraHeaders?: { [key: string]: string } | null,
         responseType: HttpResponseTypes = HttpResponseTypes.json,
         withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -279,11 +279,11 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     putFromUrl(url: string,
-               requestBody: object,
-               params?: object | string,
-               body?: object,
-               contentType?: string,
-               extraHeaders?: { [key: string]: string },
+               requestBody: object | null,
+               params?: object | string | null,
+               body?: object | null,
+               contentType?: string | null,
+               extraHeaders?: { [key: string]: string } | null,
                responseType: HttpResponseTypes = HttpResponseTypes.json,
                withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -315,11 +315,11 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     putFromUrlWithoutHeader(url: string,
-                            requestBody: object,
-                            params?: object | string,
-                            body?: object,
-                            contentType?: string,
-                            extraHeaders?: { [key: string]: string },
+                            requestBody: object | null,
+                            params?: object | string | null,
+                            body?: object | null,
+                            contentType?: string | null,
+                            extraHeaders?: { [key: string]: string } | null,
                             responseType: HttpResponseTypes = HttpResponseTypes.json,
                             withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -352,11 +352,11 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     delete(endPoint: string,
-           params?: object | string,
-           body?: object,
-           contentType?: string,
-           backendUrl?: string,
-           extraHeaders?: { [key: string]: string },
+           params?: object | string | null,
+           body?: object | null,
+           contentType?: string | null,
+           backendUrl?: string | null,
+           extraHeaders?: { [key: string]: string } | null,
            responseType: HttpResponseTypes = HttpResponseTypes.json,
            withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -387,10 +387,10 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     deleteFromUrl(url: string,
-                  params?: object | string,
-                  body?: object,
-                  contentType?: string,
-                  extraHeaders?: { [key: string]: string },
+                  params?: object | string | null,
+                  body?: object | null,
+                  contentType?: string | null,
+                  extraHeaders?: { [key: string]: string } | null,
                   responseType: HttpResponseTypes = HttpResponseTypes.json,
                   withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -421,10 +421,10 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     deleteFromUrlWithoutHeader(url: string,
-                               params?: object | string,
-                               body?: object,
-                               contentType?: string,
-                               extraHeaders?: { [key: string]: string },
+                               params?: object | string | null,
+                               body?: object | null,
+                               contentType?: string | null,
+                               extraHeaders?: { [key: string]: string } | null,
                                responseType: HttpResponseTypes = HttpResponseTypes.json,
                                withCredentials?: boolean) {
         return new Promise<any>((resolve, reject) => {
@@ -595,11 +595,11 @@ class HttpService {
         endPoint: string,
         formData: FormData,
         methodType: HttpMethodTypes = HttpMethodTypes.GET,
-        backendUrl?: string,
-        extraHeaders?: { [key: string]: string },
+        backendUrl?: string | null,
+        extraHeaders?: { [key: string]: string } | null,
         responseType: HttpResponseTypes = HttpResponseTypes.blob,
         uploadProgressEvent?: any
-    ): Promise<AxiosResponse<any>> {
+    ): Promise<any> {
         return new Promise((resolve, reject) => {
             let count = 0;
             const takeCallback = async () => {
@@ -637,13 +637,13 @@ class HttpService {
         url: string,
         formData: FormData,
         methodType: HttpMethodTypes = HttpMethodTypes.GET,
-        extraHeaders?: { [key: string]: string },
+        extraHeaders?: { [key: string]: string } | null,
         responseType: HttpResponseTypes = HttpResponseTypes.blob,
         uploadProgressEvent = (progressEvent: any) => {
             var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(percentCompleted);
         }
-    ): Promise<AxiosResponse<any>> {
+    ): Promise<any> {
         console.log(methodType);
         return new Promise((resolve, reject) => {
             let count = 0;
@@ -666,9 +666,9 @@ class HttpService {
     multipartApiCall = (endPoint: string,
                         formData: FormData,
                         methodType: HttpMethodTypes = HttpMethodTypes.GET,
-                        backendUrl?: string,
-                        extraHeaders?: { [key: string]: string },
-                        uploadProgressEvent?: (progressEvent: any) => void,
+                        backendUrl?: string | null,
+                        extraHeaders?: { [key: string]: string } | null,
+                        uploadProgressEvent?: (progressEvent: any) => void | null,
                         responseType: HttpResponseTypes = HttpResponseTypes.blob): Promise<AxiosResponse<any>> => {
         return new Promise((resolve2: any, reject2: any): any => {
 
@@ -686,12 +686,12 @@ class HttpService {
         });
     };
 
-    private getRequestOptions(params?: any,
-                              body?: any,
-                              backendUrl?: string,
-                              contentType?: string,
-                              extraHeaders?: { [key: string]: string },
-                              responseType?: HttpResponseTypes, withCredentials?: boolean, methodType?: Method): AxiosRequestConfig {
+    private getRequestOptions(params?: any | null,
+                              body?: any | null,
+                              backendUrl?: string | null,
+                              contentType?: string | null,
+                              extraHeaders?: { [key: string]: string } | null,
+                              responseType?: HttpResponseTypes | null, withCredentials?: boolean, methodType?: Method): AxiosRequestConfig {
 
         let headers: { [key: string]: string } = {
             [HttpConstants.authorizationKey]: `${HttpConstants.securityToken} ${this.getAccessToken()}`,
@@ -745,11 +745,11 @@ class HttpService {
     }
 
     private getRequestOptionsForWithoutHeader(
-        params?: any,
-        body?: any,
-        contentType?: string,
-        extraHeaders?: any,
-        responseType?: HttpResponseTypes,
+        params?: any | null,
+        body?: any | null,
+        contentType?: string | null,
+        extraHeaders?: any | null,
+        responseType?: HttpResponseTypes | null,
         withCredentials?: boolean): AxiosRequestConfig {
 
         let headers: { [key: string]: string } = {};
