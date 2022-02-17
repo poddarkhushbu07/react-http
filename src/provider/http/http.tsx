@@ -30,7 +30,7 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     get(endPoint: string,
-        params?: object | string | null,
+        params?: object | string,
         contentType?: string | null,
         backendUrl?: string | null,
         extraHeaders?: { [key: string]: string } | null,
@@ -64,7 +64,7 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     getFromUrl(url: string,
-               params?: object | string | null,
+               params?: object | string,
                contentType?: string | null,
                extraHeaders?: { [key: string]: string } | null,
                responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -97,7 +97,7 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     getFromUrlWithoutHeader(endPoint: string,
-                            params?: object | string | null,
+                            params?: object | string,
                             contentType?: string | null,
                             extraHeaders?: { [key: string]: string } | null,
                             responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -133,9 +133,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     post(endPoint: string,
-         requestBody: object | null,
-         params?: object | string | null,
-         body?: object | null,
+         requestBody: object | undefined,
+         params?: object | string,
+         body?: object,
          contentType?: string | null,
          backendUrl?: string | null,
          extraHeaders?: { [key: string]: string } | null,
@@ -170,9 +170,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     postFromUrl(url: string,
-                requestBody: object | null,
-                params?: object | string | null,
-                body?: object | null,
+                requestBody: object | undefined,
+                params?: object | string,
+                body?: object,
                 contentType?: string | null,
                 extraHeaders?: { [key: string]: string } | null,
                 responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -206,9 +206,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     postFromUrlWithoutHeader(url: string,
-                             requestBody: object | null,
-                             params?: object | string | null,
-                             body?: object | null,
+                             requestBody: object | undefined,
+                             params?: object | string,
+                             body?: object,
                              contentType?: string | null,
                              extraHeaders?: { [key: string]: string } | null,
                              responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -242,9 +242,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     put(endPoint: string,
-        requestBody: object | null,
-        params?: object | string | null,
-        body?: object | null,
+        requestBody: object | undefined,
+        params?: object | string,
+        body?: object,
         contentType?: string | null,
         backendUrl?: string | null,
         extraHeaders?: { [key: string]: string } | null,
@@ -279,9 +279,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     putFromUrl(url: string,
-               requestBody: object | null,
-               params?: object | string | null,
-               body?: object | null,
+               requestBody: object | undefined,
+               params?: object | string,
+               body?: object,
                contentType?: string | null,
                extraHeaders?: { [key: string]: string } | null,
                responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -315,9 +315,9 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     putFromUrlWithoutHeader(url: string,
-                            requestBody: object | null,
-                            params?: object | string | null,
-                            body?: object | null,
+                            requestBody: object | undefined,
+                            params?: object | string,
+                            body?: object,
                             contentType?: string | null,
                             extraHeaders?: { [key: string]: string } | null,
                             responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -352,8 +352,8 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     delete(endPoint: string,
-           params?: object | string | null,
-           body?: object | null,
+           params?: object | string,
+           body?: object,
            contentType?: string | null,
            backendUrl?: string | null,
            extraHeaders?: { [key: string]: string } | null,
@@ -387,8 +387,8 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     deleteFromUrl(url: string,
-                  params?: object | string | null,
-                  body?: object | null,
+                  params?: object | string,
+                  body?: object,
                   contentType?: string | null,
                   extraHeaders?: { [key: string]: string } | null,
                   responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -421,8 +421,8 @@ class HttpService {
      * @param {boolean} [withCredentials]
      */
     deleteFromUrlWithoutHeader(url: string,
-                               params?: object | string | null,
-                               body?: object | null,
+                               params?: object | string,
+                               body?: object,
                                contentType?: string | null,
                                extraHeaders?: { [key: string]: string } | null,
                                responseType: HttpResponseTypes = HttpResponseTypes.json,
@@ -491,6 +491,7 @@ class HttpService {
                     });
                 }
             } else {
+                HttpConstants.errorHandler(error);
                 resolve('error');
             }
         });

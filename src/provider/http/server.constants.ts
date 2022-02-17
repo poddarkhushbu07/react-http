@@ -3,6 +3,9 @@ export class HttpConstants {
     static authorizationKey: string = 'Authorization';
     static securityToken: string = 'Bearer';
     static headers: { [key: string]: string } = {};
+    // bind custom handler for error other than HTTP 401
+    static errorHandler = (error: any): void => {
+    };
 
     static setURL(val: string) {
         HttpConstants.URL = val;
